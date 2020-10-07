@@ -8,6 +8,7 @@ repository = "https://github.com/marcbone/s_curve"
 description = "Package to generate S-Curve trajectories for robotics and similar applications "
 categories =["science::robotics","mathematics"]
 keywords =["s-curve","trajectory","motion","curve","robotics"]
+readme = "README.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
