@@ -1,8 +1,8 @@
 A library to compute S-Curve trajectories. It can be used to generate motion profiles for robotics.
 
-# what is a S-Curve
+## What is an S-Curve?
 
-A S-Curve is a trajectory which is constrained to maximum jerk, acceleration and velocity.
+An S-Curve is a trajectory which is constrained to maximum jerk, acceleration and velocity.
 An S-Curve consists of 7 phases:
  * constant maximum jerk until the desired acceleration is reached
  * constant maximum acceleration phase
@@ -15,7 +15,7 @@ An S-Curve consists of 7 phases:
  In the picture below you can see an S-Curve Profile which goes from Position 0 to position 10 within 5.5 seconds with a start and end velocity of 0
  , a maximum jerk of 3, a maximum acceleration of 2 and a maximum velocity of 3.
 [![image](http://i.imgur.com/BQPhS8n.png)](http://i.imgur.com/BQPhS8n.png)
-# Example
+## Example
   ```rust
   use s_curve::;
   let constraints = SCurveConstraints {
