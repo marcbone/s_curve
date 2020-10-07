@@ -45,7 +45,6 @@ An S-Curve consists of 7 phases:
       println!("{}", s_curve(i as f64 * params.time_intervals.total_duration() / 100.));
   }
   ```
-Further documentation can be found at [here](https://docs.rs/s_curve/)
 #### License
 Copyright (c) 2020 Marco Boneberger
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option. 
