@@ -36,7 +36,7 @@
 /**
  * Struct which contains the desired limits for jerk, acceleration and velocity in SI units.
  *  These are only the limits. It can happen that the acceleration or Velocity will be actually lower
- *  after the S-Curve has been calculated. The actual maximum values are in the SCureParameters struct
+ *  after the S-Curve has been calculated. The actual maximum values are in the SCurveParameters struct
  */
 #[derive(Clone, Debug, Default)]
 pub struct SCurveConstraints {
@@ -45,7 +45,7 @@ pub struct SCurveConstraints {
     pub max_velocity: f64,
 }
 
-/// Enum which is Used to select whether you want to calculate
+/// Enum which is used to select whether you want to calculate
 /// Position, Velocity , Acceleration or Jerk of your S-Curve
 pub enum Derivative {
     Position = 0,
