@@ -4,7 +4,7 @@
 *  ===
 *  A library to create S-Curve with constrained jerk, acceleration and velocity.
 *  It can be used to create a function which desribes the  Position, Velocity, Acceleration or Jerk
-*  with respect to time. With this you can create a Motion Profile for robots.
+*  with respect to time. You can create a Motion Profile for robots with it.
 * [![image](http://i.imgur.com/BQPhS8n.png)](http://i.imgur.com/BQPhS8n.png)
 *
 * The notation follows loosely the book
@@ -35,8 +35,8 @@
 
 /**
  * Struct which contains the desired limits for jerk, acceleration and velocity in SI units.
- *  These are only the limits. It can happen that the acceleration or Velocity will be actually less
- *  after the S-Curve has been calculated. The actually maximum values are in the SCureParameters struct
+ *  These are only the limits. It can happen that the acceleration or Velocity will be actually lower
+ *  after the S-Curve has been calculated. The actual maximum values are in the SCureParameters struct
  */
 #[derive(Clone, Debug, Default)]
 pub struct SCurveConstraints {
@@ -79,7 +79,7 @@ impl SCurveTimeIntervals {
     }
 }
 
-/// Represents the Start and End Positions of the SCurve
+/// Represents the Start and End Positions of the S_Curve
 #[derive(Clone, Debug)]
 pub struct SCurveStartConditions {
     /// start position
@@ -154,7 +154,7 @@ impl SCurveInput {
         self.calc_times_case_1()
     }
     /// checks if it is actually possible to accomplish a certain trajectory. Dont trust this function
-    /// to much. But if it returns yes it is certainly doable. If it returns false it can still work by reducing acceleration an velocity
+    /// too much. But if it returns yes it is certainly doable. If it returns false it can still work by reducing acceleration an velocity
     pub fn is_trajectory_feasible(&self) -> bool {
         let t_j_star: f64 = f64::min(f64::sqrt(f64::abs(self.start_conditions.v1 - self.start_conditions.v0) / self.constraints.max_jerk),
                                      self.constraints.max_acceleration / self.constraints.max_jerk);
@@ -371,7 +371,7 @@ fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
     }
 }
 
-/// returns the S-Curve Parameters and a function which maps time  [0,t] to Postilion, Velocity,
+/// returns the S-Curve parameters and a function which maps time  [0,t] to Postilion, Velocity,
 /// Acceleration or Jerk, depending on what you set as Derivative
 pub fn s_curve_generator(input_parameters: &SCurveInput, derivative: Derivative) -> (SCurveParameters, Box<dyn Fn(f64) -> f64>) {
     let times = input_parameters.calc_intervals();
