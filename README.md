@@ -17,7 +17,7 @@ An S-Curve consists of 7 phases:
 [![image](http://i.imgur.com/BQPhS8n.png)](http://i.imgur.com/BQPhS8n.png)
 ## Example
   ```rust
-  use s_curve::;
+  use s_curve::*;
   let constraints = SCurveConstraints {
               max_jerk: 3.,
               max_acceleration: 2.0,
@@ -33,7 +33,7 @@ An S-Curve consists of 7 phases:
   let s_curve = s_curve_tmp.1;
   let params =s_curve_tmp.0;
   for i in 0..101 {
-      println!("{}", s_curve(i as f64  params.time_intervals.total_duration() / 100.));
+      println!("{}", s_curve(i as f64 * params.time_intervals.total_duration() / 100.));
   }
   ```
 Further documentation can be found at [here](https://docs.rs/s_curve/)
