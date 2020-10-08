@@ -118,7 +118,7 @@ pub struct SCurveParameters {
     pub a_lim_a: f64,
     /// minimum acceleration during the deceleration phase
     pub a_lim_d: f64,
-    /// maxium velocity
+    /// maximum velocity
     pub v_lim: f64,
     /// The start conditions of the S-Curve
     pub conditions: SCurveStartConditions,
@@ -371,7 +371,7 @@ fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
     }
 }
 
-/// returns the S-Curve parameters and a function which maps time  [0,t] to Postilion, Velocity,
+/// returns the S-Curve parameters and a function which maps time  [0,t] to Position, Velocity,
 /// Acceleration or Jerk, depending on what you set as Derivative
 pub fn s_curve_generator(input_parameters: &SCurveInput, derivative: Derivative) -> (SCurveParameters, Box<dyn Fn(f64) -> f64>) {
     let times = input_parameters.calc_intervals();
