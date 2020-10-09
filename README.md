@@ -1,5 +1,5 @@
 [![crates.io](https://img.shields.io/crates/v/s_curve.svg)](https://crates.io/crates/s_curve)
-[![GitHub Workflow Status](https://img.shields.io/github/workflow/status/marcbone/s_curve/Rust)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/marcbone/s_curve/Rust)
 [![crates.io](https://img.shields.io/crates/l/s_curve.svg)](https://crates.io/crates/s_curve)
 [![crates.io](https://img.shields.io/crates/d/s_curve.svg)](https://crates.io/crates/s_curve)
 [![docs.rs](https://docs.rs/s_curve/badge.svg)](https://docs.rs/s_curve)
