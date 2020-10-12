@@ -8,7 +8,7 @@
 * [![image](http://i.imgur.com/BQPhS8n.png)](http://i.imgur.com/BQPhS8n.png)
 *
 * The notation follows loosely the book
-* "Trajectory Planning forAutomatic Machinesand Robots" by Luigi Biagotti and Claudio Melchiorri
+* "Trajectory Planning for Automatic Machinesand Robots" by Luigi Biagotti and Claudio Melchiorri
 *  # Example
 *  ```rust
 *  use s_curve::*;
@@ -46,7 +46,7 @@ pub struct SCurveConstraints {
 }
 
 /// Enum which is used to select whether you want to calculate
-/// Position, Velocity , Acceleration or Jerk of your S-Curve
+/// Position, Velocity, Acceleration or Jerk of your S-Curve
 pub enum Derivative {
     Position = 0,
     Velocity = 1,
@@ -114,11 +114,11 @@ pub struct SCurveParameters {
     pub j_max: f64,
     /// minimum jerk
     pub j_min: f64,
-    ///maximum acceleration during the acceleration phase
+    ///maximum achieved acceleration during the acceleration phase
     pub a_lim_a: f64,
-    /// minimum acceleration during the deceleration phase
+    /// minimum achieved acceleration during the deceleration phase
     pub a_lim_d: f64,
-    /// maximum velocity
+    /// maximum  achieved velocity
     pub v_lim: f64,
     /// The start conditions of the S-Curve
     pub conditions: SCurveStartConditions,
@@ -154,7 +154,7 @@ impl SCurveInput {
         self.calc_times_case_1()
     }
     /// checks if it is actually possible to accomplish a certain trajectory. Dont trust this function
-    /// too much. But if it returns yes it is certainly doable. If it returns false it can still work by reducing acceleration an velocity
+    /// too much. But if it returns yes it is certainly doable. If it returns false it can still work by reducing acceleration and velocity
     pub fn is_trajectory_feasible(&self) -> bool {
         let t_j_star: f64 = f64::min(f64::sqrt(f64::abs(self.start_conditions.v1 - self.start_conditions.v0) / self.constraints.max_jerk),
                                      self.constraints.max_acceleration / self.constraints.max_jerk);
@@ -372,7 +372,8 @@ fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
 }
 
 /// returns the S-Curve parameters and a function which maps time  [0,t] to Position, Velocity,
-/// Acceleration or Jerk, depending on what you set as Derivative
+/// Acceleration or Jerk, depending on what you set as Derivative. Note that the acceleration
+/// and velocity could be decreased if it is not possible to achieve them.
 pub fn s_curve_generator(input_parameters: &SCurveInput, derivative: Derivative) -> (SCurveParameters, Box<dyn Fn(f64) -> f64>) {
     let times = input_parameters.calc_intervals();
     let params = SCurveParameters::new(&times, input_parameters);
