@@ -1,5 +1,5 @@
 //Copyright (c) 2020 Marco Boneberger
-use gnuplot::{Figure, Caption, Color, AxesCommon};
+use gnuplot::{Figure, Caption, AxesCommon};
 use gnuplot::Coordinate::Graph;
 use s_curve::*;
 

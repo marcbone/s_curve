@@ -171,11 +171,11 @@ impl SCurveInput {
     }
     fn is_a_max_not_reached(&self) -> bool {
         return (self.constraints.max_velocity - self.start_conditions.v0) * self.constraints.max_jerk <
-            self.constraints.max_acceleration.powf(2.);
+            self.constraints.max_acceleration.powi(2);
     }
     fn is_a_min_not_reached(&self) -> bool {
         return (self.constraints.max_velocity - self.start_conditions.v1) * self.constraints.max_jerk <
-            self.constraints.max_acceleration.powf(2.);
+            self.constraints.max_acceleration.powi(2);
     }
 
     fn calc_times_case_1(&self) -> SCurveTimeIntervals {
@@ -222,17 +222,17 @@ impl SCurveInput {
         let mut new_input = self.clone();
         times.t_j1 = new_input.constraints.max_acceleration / new_input.constraints.max_jerk;
         times.t_j2 = new_input.constraints.max_acceleration / new_input.constraints.max_jerk;
-        let delta = new_input.constraints.max_acceleration.powf(4.) / new_input.constraints.max_jerk.powf(2.) +
-            2. * (self.start_conditions.v0.powf(2.) + self.start_conditions.v1.powf(2.)) +
+        let delta = new_input.constraints.max_acceleration.powi(4) / new_input.constraints.max_jerk.powi(2) +
+            2. * (self.start_conditions.v0.powi(2) + self.start_conditions.v1.powi(2)) +
             new_input.constraints.max_acceleration * (4. * self.start_conditions.h() -
                 2. * new_input.constraints.max_acceleration /
                     new_input.constraints.max_jerk *
                     (self.start_conditions.v0 + self.start_conditions.v1));
         times.t_a =
-            (new_input.constraints.max_acceleration.powf(2.) / new_input.constraints.max_jerk - 2. * self.start_conditions.v0 +
+            (new_input.constraints.max_acceleration.powi(2) / new_input.constraints.max_jerk - 2. * self.start_conditions.v0 +
                 f64::sqrt(delta)) / (2. * new_input.constraints.max_acceleration);
         times.t_d =
-            (new_input.constraints.max_acceleration.powf(2.) / new_input.constraints.max_jerk - 2. * self.start_conditions.v1 +
+            (new_input.constraints.max_acceleration.powi(2) / new_input.constraints.max_jerk - 2. * self.start_conditions.v1 +
                 f64::sqrt(delta)) / (2. * new_input.constraints.max_acceleration);
         times.t_v = 0.;
         if times.is_max_acceleration_not_reached() {
@@ -253,8 +253,8 @@ impl SCurveInput {
             times.t_d = 2. * self.start_conditions.h() / (self.start_conditions.v0 + self.start_conditions.v1);
             times.t_j2 = (new_input.constraints.max_jerk * self.start_conditions.h() -
                 f64::sqrt(new_input.constraints.max_jerk *
-                    (new_input.constraints.max_jerk * self.start_conditions.h().powf(2.) +
-                        (self.start_conditions.v0 + self.start_conditions.v1).powf(2.) * (
+                    (new_input.constraints.max_jerk * self.start_conditions.h().powi(2) +
+                        (self.start_conditions.v0 + self.start_conditions.v1).powi(2) * (
                             self.start_conditions.v1 - self.start_conditions.v0)))) / (
                 new_input.constraints.max_jerk * (self.start_conditions.v1 + self.start_conditions.v0));
         }
@@ -264,8 +264,8 @@ impl SCurveInput {
             times.t_a = 2. * self.start_conditions.h() / (self.start_conditions.v0 + self.start_conditions.v1);
             times.t_j2 = (new_input.constraints.max_jerk * self.start_conditions.h() -
                 f64::sqrt(new_input.constraints.max_jerk *
-                    (new_input.constraints.max_jerk * self.start_conditions.h().powf(2.) -
-                        (self.start_conditions.v0 + self.start_conditions.v1).powf(2.) * (
+                    (new_input.constraints.max_jerk * self.start_conditions.h().powi(2) -
+                        (self.start_conditions.v0 + self.start_conditions.v1).powi(2) * (
                             self.start_conditions.v1 - self.start_conditions.v0)))) / (
                 new_input.constraints.max_jerk * (self.start_conditions.v1 + self.start_conditions.v0));
         }
@@ -279,23 +279,23 @@ fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
         return p.conditions.q0;
     }
     if t <= times.t_j1 {
-        p.conditions.q0 + p.conditions.v0 * t + p.j_max * t.powf(3.) / 6.
+        p.conditions.q0 + p.conditions.v0 * t + p.j_max * t.powi(3) / 6.
     } else if t <= times.t_a - times.t_j1 {
-        p.conditions.q0 + p.conditions.v0 * t + p.a_lim_a / 6. * (3. * t.powf(2.) - 3. * times.t_j1 * t + times.t_j1.powf(2.))
+        p.conditions.q0 + p.conditions.v0 * t + p.a_lim_a / 6. * (3. * t.powi(2) - 3. * times.t_j1 * t + times.t_j1.powi(2))
     } else if t <= times.t_a {
-        p.conditions.q0 + (p.v_lim + p.conditions.v0) * times.t_a / 2. - p.v_lim * (times.t_a - t) - p.j_min * (times.t_a - t).powf(3.) / 6.
+        p.conditions.q0 + (p.v_lim + p.conditions.v0) * times.t_a / 2. - p.v_lim * (times.t_a - t) - p.j_min * (times.t_a - t).powi(3) / 6.
     } else if t <= times.t_a + times.t_v {
         p.conditions.q0 + (p.v_lim + p.conditions.v0) * times.t_a / 2. + p.v_lim * (t - times.t_a)
     } else if t <= times.total_duration() - times.t_d + times.t_j2 {
         p.conditions.q1 - (p.v_lim + p.conditions.v1) * times.t_d / 2. + p.v_lim * (t - times.total_duration() + times.t_d) - p.j_max * (
-            t - times.total_duration() + times.t_d).powf(3.) / 6.
+            t - times.total_duration() + times.t_d).powi(3) / 6.
     } else if t <= times.total_duration() - times.t_j2 {
         p.conditions.q1 - (p.v_lim + p.conditions.v1) * times.t_d / 2. + p.v_lim * (t - times.total_duration() + times.t_d) +
             p.a_lim_d / 6. * (
-                3. * (t - times.total_duration() + times.t_d).powf(2.) - 3. * times.t_j2 * (
-                    t - times.total_duration() + times.t_d) + times.t_j2.powf(2.))
+                3. * (t - times.total_duration() + times.t_d).powi(2) - 3. * times.t_j2 * (
+                    t - times.total_duration() + times.t_d) + times.t_j2.powi(2))
     } else if t <= times.total_duration() {
-        p.conditions.q1 - p.conditions.v1 * (times.total_duration() - t) - p.j_max * (times.total_duration() - t).powf(3.) / 6.
+        p.conditions.q1 - p.conditions.v1 * (times.total_duration() - t) - p.j_max * (times.total_duration() - t).powi(3) / 6.
     } else {
         p.conditions.q1
     }
@@ -307,19 +307,19 @@ fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
         return p.conditions.v0;
     }
     if t <= times.t_j1 {
-        p.conditions.v0 + p.j_max * t.powf(2.) / 2.
+        p.conditions.v0 + p.j_max * t.powi(2) / 2.
     } else if t <= times.t_a - times.t_j1 {
         p.conditions.v0 + p.a_lim_a * (t - times.t_j1 / 2.)
     } else if t <= times.t_a {
-        p.v_lim + p.j_min * (times.t_a - t).powf(2.) / 2.
+        p.v_lim + p.j_min * (times.t_a - t).powi(2) / 2.
     } else if t <= times.t_a + times.t_v {
         p.v_lim
     } else if t <= times.total_duration() - times.t_d + times.t_j2 {
-        p.v_lim - p.j_max * (t - times.total_duration() + times.t_d).powf(2.) / 2.
+        p.v_lim - p.j_max * (t - times.total_duration() + times.t_d).powi(2) / 2.
     } else if t <= times.total_duration() - times.t_j2 {
         p.v_lim + p.a_lim_d * (t - times.total_duration() + times.t_d - times.t_j2 / 2.)
     } else if t <= times.total_duration() {
-        p.conditions.v1 + p.j_max * (times.total_duration() - t).powf(2.) / 2.
+        p.conditions.v1 + p.j_max * (times.total_duration() - t).powi(2) / 2.
     } else {
         p.conditions.v1
     }

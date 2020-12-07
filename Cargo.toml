@@ -12,6 +12,14 @@ readme = "README.md"
 documentation = "https://docs.rs/s_curve/"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "s_curve"
+path = "src/lib.rs"
+
+[[example]]
+name = "plot"
+path = "examples/plot.rs"
+
 [dependencies]
 [dev-dependencies]
 gnuplot = "0.0.37"
