@@ -158,7 +158,7 @@ impl SCurveInput {
     pub fn is_trajectory_feasible(&self) -> bool {
         let t_j_star: f64 = f64::min(f64::sqrt(f64::abs(self.start_conditions.v1 - self.start_conditions.v0) / self.constraints.max_jerk),
                                      self.constraints.max_acceleration / self.constraints.max_jerk);
-        if t_j_star == self.constraints.max_acceleration / self.constraints.max_jerk {
+        if (t_j_star - self.constraints.max_acceleration / self.constraints.max_jerk).abs() < 1e-10 {
             return self.start_conditions.h() > 0.5 * (self.start_conditions.v1 + self.start_conditions.v0) * (t_j_star +
                 f64::abs(self.start_conditions.v1 -
                     self.start_conditions.v0) /
@@ -167,15 +167,15 @@ impl SCurveInput {
         if t_j_star < self.constraints.max_acceleration / self.constraints.max_jerk {
             return self.start_conditions.h() > t_j_star * (self.start_conditions.v0 + self.start_conditions.v1);
         }
-        return false;
+        false
     }
     fn is_a_max_not_reached(&self) -> bool {
-        return (self.constraints.max_velocity - self.start_conditions.v0) * self.constraints.max_jerk <
-            self.constraints.max_acceleration.powi(2);
+        (self.constraints.max_velocity - self.start_conditions.v0) * self.constraints.max_jerk <
+            self.constraints.max_acceleration.powi(2)
     }
     fn is_a_min_not_reached(&self) -> bool {
-        return (self.constraints.max_velocity - self.start_conditions.v1) * self.constraints.max_jerk <
-            self.constraints.max_acceleration.powi(2);
+        (self.constraints.max_velocity - self.start_conditions.v1) * self.constraints.max_jerk <
+            self.constraints.max_acceleration.powi(2)
     }
 
     fn calc_times_case_1(&self) -> SCurveTimeIntervals {
@@ -214,7 +214,7 @@ impl SCurveInput {
         }
         self.handle_negative_acceleration_time(&mut times, &new_input);
 
-        return times;
+        times
     }
 
     fn calc_times_case_2(&self) -> SCurveTimeIntervals {
@@ -244,7 +244,7 @@ impl SCurveInput {
         }
         self.handle_negative_acceleration_time(&mut times, &new_input);
 
-        return times;
+        times
     }
     fn handle_negative_acceleration_time(&self, times: &mut SCurveTimeIntervals, new_input: &SCurveInput) {
         if times.t_a < 0. {
@@ -350,9 +350,7 @@ fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
 
 fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
-    if t < 0. {
-        p.j_max
-    } else if t <= times.t_j1 {
+    if t < times.t_j1 {
         p.j_max
     } else if t <= times.t_a - times.t_j1 {
         0.
@@ -364,8 +362,6 @@ fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
         p.j_min
     } else if t <= times.total_duration() - times.t_j2 {
         0.
-    } else if t <= times.total_duration() {
-        p.j_max
     } else {
         p.j_max
     }
