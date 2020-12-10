@@ -7,18 +7,17 @@ fn main() {
     let constraints = SCurveConstraints {
         max_jerk: 3.,
         max_acceleration: 2.0,
-        max_velocity: 3.};
-    let  start_conditions = SCurveStartConditions {
+        max_velocity: 3.,
+    };
+    let start_conditions = SCurveStartConditions {
         q0: 0.,
         q1: 10.,
         v0: 0.,
-        v1: 0.
+        v1: 0.,
     };
-    let input  =  SCurveInput {constraints, start_conditions};
-    let s_curve_tmp = s_curve_generator(&input,Derivative::Velocity);
-    let s_curve = s_curve_tmp.1;
-    let params =s_curve_tmp.0;
-    let mut x :Vec<f64> = Vec::new();
+    let input = SCurveInput { constraints, start_conditions };
+    let (params, s_curve) = s_curve_generator(&input, Derivative::Velocity);
+    let mut x: Vec<f64> = Vec::new();
     let mut y: Vec<f64> = Vec::new();
     for i in 0..1001 {
         x.push(i as f64 * params.time_intervals.total_duration() / 1000.);

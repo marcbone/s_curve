@@ -22,10 +22,8 @@
 *              v0: 0., // start velocity
 *              v1: 0. // end velocity
 *          };
-*          let input  =  SCurveInput{constraints, start_conditions};
-*          let s_curve_tmp = s_curve_generator(&input,Derivative::Velocity);
-*          let s_curve = s_curve_tmp.1;
-*          let params =s_curve_tmp.0;
+*          let input = SCurveInput{constraints, start_conditions};
+*          let (params,s_curve) = s_curve_generator(&input,Derivative::Velocity);
 *          for i in 0..101 {
 *              println!("{}", s_curve(i as f64 * params.time_intervals.total_duration() / 100.));
 *          }
