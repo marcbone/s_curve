@@ -201,12 +201,12 @@ impl SCurveInput {
             times.t_a / 2. * (1. + self.start_conditions.v0 / new_input.constraints.max_velocity) -
             times.t_d / 2. * (1. + self.start_conditions.v1 / new_input.constraints.max_velocity);
         if times.t_v <= 0. {
-            return self.calc_times_case_2();
+            return self.calc_times_case_2(0);
         }
         if times.is_max_acceleration_not_reached() {
-            new_input.constraints.max_acceleration *= 0.99;
-            if new_input.constraints.max_acceleration > 0.1 {
-                return new_input.calc_times_case_2();
+            new_input.constraints.max_acceleration *= 0.5;
+            if new_input.constraints.max_acceleration > 0.01 {
+                return new_input.calc_times_case_2(0);
             }
             new_input.constraints.max_acceleration = 0.;
         }
@@ -214,34 +214,56 @@ impl SCurveInput {
 
         times
     }
-
-    fn calc_times_case_2(&self) -> SCurveTimeIntervals {
-        let mut times = SCurveTimeIntervals::default();
+    fn calc_times_case_2(&self, mut recursion_depth: i32) -> SCurveTimeIntervals {
+        recursion_depth += 1;
+        let mut times = self.get_times_case_2();
         let mut new_input = self.clone();
-        times.t_j1 = new_input.constraints.max_acceleration / new_input.constraints.max_jerk;
-        times.t_j2 = new_input.constraints.max_acceleration / new_input.constraints.max_jerk;
-        let delta = new_input.constraints.max_acceleration.powi(4) / new_input.constraints.max_jerk.powi(2) +
-            2. * (self.start_conditions.v0.powi(2) + self.start_conditions.v1.powi(2)) +
-            new_input.constraints.max_acceleration * (4. * self.start_conditions.h() -
-                2. * new_input.constraints.max_acceleration /
-                    new_input.constraints.max_jerk *
-                    (self.start_conditions.v0 + self.start_conditions.v1));
-        times.t_a =
-            (new_input.constraints.max_acceleration.powi(2) / new_input.constraints.max_jerk - 2. * self.start_conditions.v0 +
-                f64::sqrt(delta)) / (2. * new_input.constraints.max_acceleration);
-        times.t_d =
-            (new_input.constraints.max_acceleration.powi(2) / new_input.constraints.max_jerk - 2. * self.start_conditions.v1 +
-                f64::sqrt(delta)) / (2. * new_input.constraints.max_acceleration);
-        times.t_v = 0.;
         if times.is_max_acceleration_not_reached() {
-            new_input.constraints.max_acceleration *= 0.99;
-            if new_input.constraints.max_acceleration > 0.1 {
-                return new_input.calc_times_case_2();
+            new_input.constraints.max_acceleration *= 0.5;
+            if new_input.constraints.max_acceleration > 0.01 {
+                return new_input.calc_times_case_2(recursion_depth);
             }
             new_input.constraints.max_acceleration = 0.;
         }
         self.handle_negative_acceleration_time(&mut times, &new_input);
+        if recursion_depth != 1 {
+            new_input.constraints.max_acceleration *= 2.;
+        }
+        new_input.calc_times_case_2_precise(recursion_depth)
+    }
 
+    fn get_times_case_2(&self) -> SCurveTimeIntervals {
+        let mut times = SCurveTimeIntervals::default();
+        times.t_j1 = self.constraints.max_acceleration / self.constraints.max_jerk;
+        times.t_j2 = self.constraints.max_acceleration / self.constraints.max_jerk;
+        let delta = self.constraints.max_acceleration.powi(4) / self.constraints.max_jerk.powi(2) +
+            2. * (self.start_conditions.v0.powi(2) + self.start_conditions.v1.powi(2)) +
+            self.constraints.max_acceleration * (4. * self.start_conditions.h() -
+                2. * self.constraints.max_acceleration /
+                    self.constraints.max_jerk *
+                    (self.start_conditions.v0 + self.start_conditions.v1));
+        times.t_a =
+            (self.constraints.max_acceleration.powi(2) / self.constraints.max_jerk - 2. * self.start_conditions.v0 +
+                f64::sqrt(delta)) / (2. * self.constraints.max_acceleration);
+        times.t_d =
+            (self.constraints.max_acceleration.powi(2) / self.constraints.max_jerk - 2. * self.start_conditions.v1 +
+                f64::sqrt(delta)) / (2. * self.constraints.max_acceleration);
+        times.t_v = 0.;
+        times
+    }
+
+    fn calc_times_case_2_precise(&self, mut recursion_depth: i32) -> SCurveTimeIntervals {
+        recursion_depth += 1;
+        let mut times = self.get_times_case_2();
+        let mut new_input = self.clone();
+        if times.is_max_acceleration_not_reached() {
+            new_input.constraints.max_acceleration *= 0.99;
+            if new_input.constraints.max_acceleration > 0.01 {
+                return new_input.calc_times_case_2_precise(recursion_depth);
+            }
+            new_input.constraints.max_acceleration = 0.;
+        }
+        self.handle_negative_acceleration_time(&mut times, &new_input);
         times
     }
     fn handle_negative_acceleration_time(&self, times: &mut SCurveTimeIntervals, new_input: &SCurveInput) {
