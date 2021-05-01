@@ -1,6 +1,6 @@
 //Copyright (c) 2020 Marco Boneberger
-use gnuplot::{Figure, Caption, AxesCommon};
 use gnuplot::Coordinate::Graph;
+use gnuplot::{AxesCommon, Caption, Figure};
 use s_curve::*;
 
 fn main() {
@@ -15,13 +15,18 @@ fn main() {
         v0: 0.,
         v1: 0.,
     };
-    let input = SCurveInput { constraints, start_conditions };
+    let input = SCurveInput {
+        constraints,
+        start_conditions,
+    };
     let (params, s_curve) = s_curve_generator(&input, Derivative::Velocity);
     let mut x: Vec<f64> = Vec::new();
     let mut y: Vec<f64> = Vec::new();
     for i in 0..1001 {
         x.push(i as f64 * params.time_intervals.total_duration() / 1000.);
-        y.push(s_curve(i as f64 * params.time_intervals.total_duration() / 1000.));
+        y.push(s_curve(
+            i as f64 * params.time_intervals.total_duration() / 1000.,
+        ));
     }
     let mut fg = Figure::new();
     fg.axes2d()
@@ -29,11 +34,6 @@ fn main() {
         .set_legend(Graph(0.5), Graph(0.9), &[], &[])
         .set_x_label("time in seconds", &[])
         .set_y_label("velocity in m/s", &[])
-        .lines(
-            x.clone(),
-            y.clone(),
-            &[Caption("Velocity")],
-        );
+        .lines(x.clone(), y.clone(), &[Caption("Velocity")]);
     fg.show().unwrap();
 }
-
