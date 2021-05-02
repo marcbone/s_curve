@@ -31,6 +31,13 @@
 *
 */
 
+
+#![cfg_attr(feature = "no_std", no_std)]
+
+
+#[cfg(feature = "no_std")]
+use num_traits::float::Float;
+
 /**
  * Struct which contains the desired limits for jerk, acceleration and velocity in SI units.
  *  These are only the limits. It can happen that the acceleration or Velocity will be actually lower
@@ -333,7 +340,8 @@ impl SCurveInput {
     }
 }
 
-fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
+
+pub fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
         return p.conditions.q0;
@@ -370,7 +378,7 @@ fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
     }
 }
 
-fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
+pub fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
         return p.conditions.v0;
@@ -394,7 +402,7 @@ fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
     }
 }
 
-fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
+pub fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
         0.
@@ -417,7 +425,7 @@ fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
     }
 }
 
-fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
+pub fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < times.t_j1 {
         p.j_max
@@ -439,6 +447,7 @@ fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
 /// returns the S-Curve parameters and a function which maps time  [0,t] to Position, Velocity,
 /// Acceleration or Jerk, depending on what you set as Derivative. Note that the acceleration
 /// and velocity could be decreased if it is not possible to achieve them.
+#[cfg(not(feature = "no_std"))]
 pub fn s_curve_generator(
     input_parameters: &SCurveInput,
     derivative: Derivative,
@@ -465,6 +474,7 @@ pub fn s_curve_generator(
 }
 
 #[cfg(test)]
+#[cfg(not(feature = "no_std"))]
 mod tests {
     use crate::{
         s_curve_generator, Derivative, SCurveConstraints, SCurveInput, SCurveStartConditions,
