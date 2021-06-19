@@ -31,9 +31,7 @@
 *
 */
 
-
 #![cfg_attr(feature = "no_std", no_std)]
-
 
 #[cfg(feature = "no_std")]
 use num_traits::float::Float;
@@ -339,7 +337,6 @@ impl SCurveInput {
         }
     }
 }
-
 
 pub fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
