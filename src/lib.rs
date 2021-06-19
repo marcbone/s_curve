@@ -15,7 +15,8 @@
 *  let constraints = SCurveConstraints {
 *              max_jerk: 3.,
 *              max_acceleration: 2.0,
-*              max_velocity: 3.};
+*              max_velocity: 3.
+*          };
 *          let  start_conditions = SCurveStartConditions {
 *              q0: 0., // start position
 *              q1: 10., // end position
@@ -23,7 +24,7 @@
 *              v1: 0. // end velocity
 *          };
 *          let input = SCurveInput{constraints, start_conditions};
-*          let (params,s_curve) = s_curve_generator(&input,Derivative::Velocity);
+*          let (params, s_curve) = s_curve_generator(&input,Derivative::Velocity);
 *          for i in 0..101 {
 *              println!("{}", s_curve(i as f64 * params.time_intervals.total_duration() / 100.));
 *          }
@@ -471,11 +472,10 @@ pub fn s_curve_generator(
 }
 
 #[cfg(test)]
-#[cfg(not(feature = "no_std"))]
 mod tests {
-    use crate::{
-        s_curve_generator, Derivative, SCurveConstraints, SCurveInput, SCurveStartConditions,
-    };
+    #[cfg(not(feature = "no_std"))]
+    use crate::{s_curve_generator, Derivative};
+    use crate::{SCurveConstraints, SCurveInput, SCurveStartConditions};
 
     #[test]
     fn timings_3_9() {
@@ -582,6 +582,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(not(feature = "no_std"))]
     fn simple_curve() {
         let constraints = SCurveConstraints {
             max_jerk: 30.,

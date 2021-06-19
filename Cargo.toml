@@ -24,7 +24,7 @@ path = "examples/plot.rs"
 # todo https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#platform-specific-dependencies
 version = "*"
 default-features = false
-features = ["libm"] 
+features = ["libm"]
 
 [dev-dependencies]
 gnuplot = "0.0.37"
