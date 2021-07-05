@@ -15,7 +15,8 @@
 *  let constraints = SCurveConstraints {
 *              max_jerk: 3.,
 *              max_acceleration: 2.0,
-*              max_velocity: 3.};
+*              max_velocity: 3.
+*          };
 *          let  start_conditions = SCurveStartConditions {
 *              q0: 0., // start position
 *              q1: 10., // end position
@@ -23,13 +24,16 @@
 *              v1: 0. // end velocity
 *          };
 *          let input = SCurveInput{constraints, start_conditions};
-*          let (params,s_curve) = s_curve_generator(&input,Derivative::Velocity);
+*          let (params, s_curve) = s_curve_generator(&input,Derivative::Velocity);
 *          for i in 0..101 {
 *              println!("{}", s_curve(i as f64 * params.time_intervals.total_duration() / 100.));
 *          }
 *  ```
 *
 */
+
+#[cfg(not(feature = "std"))]
+use num_traits::float::Float;
 
 /**
  * Struct which contains the desired limits for jerk, acceleration and velocity in SI units.
@@ -333,7 +337,8 @@ impl SCurveInput {
     }
 }
 
-fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
+/// calculates the current position of the trajectory given the SCurve parameters and a time t in seconds.
+pub fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
         return p.conditions.q0;
@@ -369,8 +374,8 @@ fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
         p.conditions.q1
     }
 }
-
-fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
+/// calculates the current velocity of the trajectory given the SCurve parameters and a time t in seconds.
+pub fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
         return p.conditions.v0;
@@ -394,7 +399,8 @@ fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
     }
 }
 
-fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
+/// calculates the current acceleration of the trajectory given the SCurve parameters and a time t in seconds.
+pub fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
         0.
@@ -416,8 +422,8 @@ fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
         0.
     }
 }
-
-fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
+/// calculates the current jerk of the trajectory given the SCurve parameters and a time t in seconds.
+pub fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < times.t_j1 {
         p.j_max
@@ -439,6 +445,7 @@ fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
 /// returns the S-Curve parameters and a function which maps time  [0,t] to Position, Velocity,
 /// Acceleration or Jerk, depending on what you set as Derivative. Note that the acceleration
 /// and velocity could be decreased if it is not possible to achieve them.
+#[cfg(feature = "std")]
 pub fn s_curve_generator(
     input_parameters: &SCurveInput,
     derivative: Derivative,
@@ -466,9 +473,9 @@ pub fn s_curve_generator(
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        s_curve_generator, Derivative, SCurveConstraints, SCurveInput, SCurveStartConditions,
-    };
+    #[cfg(feature = "std")]
+    use crate::{s_curve_generator, Derivative};
+    use crate::{SCurveConstraints, SCurveInput, SCurveStartConditions};
 
     #[test]
     fn timings_3_9() {
@@ -575,6 +582,7 @@ mod tests {
     }
 
     #[test]
+    #[cfg(feature = "std")]
     fn simple_curve() {
         let constraints = SCurveConstraints {
             max_jerk: 30.,

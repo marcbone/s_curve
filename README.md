@@ -31,7 +31,8 @@ An S-Curve consists of 7 phases:
   let constraints = SCurveConstraints {
               max_jerk: 3.,
               max_acceleration: 2.0,
-              max_velocity: 3.};
+              max_velocity: 3.
+  };
   let  start_conditions = SCurveStartConditions {
       q0: 0., // start position
       q1: 10., // end position
@@ -39,11 +40,17 @@ An S-Curve consists of 7 phases:
       v1: 0. // end velocity
   };
 let input  =  SCurveInput{constraints, start_conditions};
-let (params,s_curve) = s_curve_generator( & input,Derivative::Velocity);
+let (params, s_curve) = s_curve_generator( &input,Derivative::Velocity);
 for i in 0..101 {
       println!("{}", s_curve(i as f64 * params.time_intervals.total_duration() / 100.));
   }
   ```
+## no-std support
+
+To use scurve in an environment without the standard library you can set ```default_features = false``` for the crate.
+Then you have to use the eval_{position,velocity,acceleration,jerk} directly.
+
+
 #### License
 Copyright (c) 2020 Marco Boneberger
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option. 
