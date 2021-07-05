@@ -45,6 +45,12 @@ for i in 0..101 {
       println!("{}", s_curve(i as f64 * params.time_intervals.total_duration() / 100.));
   }
   ```
+## no-std support
+
+To use scurve in an environment without the standard library you can set ```default_features = false``` for the crate.
+Then you have to use the eval_{position,velocity,acceleration,jerk} directly.
+
+
 #### License
 Copyright (c) 2020 Marco Boneberger
 Licensed under either of [Apache License, Version 2.0](LICENSE-APACHE) or [MIT license](LICENSE-MIT) at your option. 

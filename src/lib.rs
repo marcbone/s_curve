@@ -32,9 +32,7 @@
 *
 */
 
-#![cfg_attr(feature = "no_std", no_std)]
-
-#[cfg(feature = "no_std")]
+#[cfg(not(feature = "std"))]
 use num_traits::float::Float;
 
 /**
@@ -339,6 +337,7 @@ impl SCurveInput {
     }
 }
 
+/// calculates the current position of the trajectory given the SCurve parameters and a time t in seconds.
 pub fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
@@ -375,7 +374,7 @@ pub fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
         p.conditions.q1
     }
 }
-
+/// calculates the current velocity of the trajectory given the SCurve parameters and a time t in seconds.
 pub fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
@@ -400,6 +399,7 @@ pub fn eval_velocity(p: &SCurveParameters, t: f64) -> f64 {
     }
 }
 
+/// calculates the current acceleration of the trajectory given the SCurve parameters and a time t in seconds.
 pub fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < 0. {
@@ -422,7 +422,7 @@ pub fn eval_acceleration(p: &SCurveParameters, t: f64) -> f64 {
         0.
     }
 }
-
+/// calculates the current jerk of the trajectory given the SCurve parameters and a time t in seconds.
 pub fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
     let times = &p.time_intervals;
     if t < times.t_j1 {
@@ -445,7 +445,7 @@ pub fn eval_jerk(p: &SCurveParameters, t: f64) -> f64 {
 /// returns the S-Curve parameters and a function which maps time  [0,t] to Position, Velocity,
 /// Acceleration or Jerk, depending on what you set as Derivative. Note that the acceleration
 /// and velocity could be decreased if it is not possible to achieve them.
-#[cfg(not(feature = "no_std"))]
+#[cfg(feature = "std")]
 pub fn s_curve_generator(
     input_parameters: &SCurveInput,
     derivative: Derivative,
@@ -473,7 +473,7 @@ pub fn s_curve_generator(
 
 #[cfg(test)]
 mod tests {
-    #[cfg(not(feature = "no_std"))]
+    #[cfg(feature = "std")]
     use crate::{s_curve_generator, Derivative};
     use crate::{SCurveConstraints, SCurveInput, SCurveStartConditions};
 
@@ -582,7 +582,7 @@ mod tests {
     }
 
     #[test]
-    #[cfg(not(feature = "no_std"))]
+    #[cfg(feature = "std")]
     fn simple_curve() {
         let constraints = SCurveConstraints {
             max_jerk: 30.,

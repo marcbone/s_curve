@@ -22,7 +22,7 @@ path = "examples/plot.rs"
 
 [dependencies.num-traits]
 # todo https://doc.rust-lang.org/cargo/reference/specifying-dependencies.html#platform-specific-dependencies
-version = "*"
+version = "0.2"
 default-features = false
 features = ["libm"]
 
@@ -31,5 +31,5 @@ gnuplot = "0.0.37"
 
 
 [features]
-default = []
-no_std = []
+default = ["std"]
+std = []
