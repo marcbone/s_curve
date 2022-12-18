@@ -901,7 +901,7 @@ mod tests {
             start_conditions,
         };
         let times = input.calc_intervals();
-        
+
         assert_eq!(times.total_duration(), 6.194444444444445);
     }
 
