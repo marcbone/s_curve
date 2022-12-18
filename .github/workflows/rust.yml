@@ -22,3 +22,17 @@ jobs:
         run: cargo fmt -- --check
       - name: Run tests
         run: cargo test --verbose
+      - name: rust-grcov
+        # You may pin to the exact commit or the version.
+        # uses: actions-rs/grcov@bb47b1ed7883a1502fa6875d562727ace2511248
+        uses: actions-rs/grcov@v0.1.5
+        with:
+          # Path to the configuration file (optional, relative to the repository root)
+          config: .github/actions-rs/grcov.yml
+      - name: Codecov
+        # You may pin to the exact commit or the version.
+        # uses: codecov/codecov-action@d9f34f8cd5cb3b3eb79b3e4b5dae3a16df499a70
+        uses: codecov/codecov-action@v3.1.1
+        with:
+          # Comma-separated list of files to upload
+          files: lcov.info 
