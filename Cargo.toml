@@ -20,6 +20,10 @@ path = "src/lib.rs"
 name = "plot"
 path = "examples/plot.rs"
 
+[[example]]
+name = "plotall"
+path = "examples/plotall.rs"
+
 [dependencies]
 [dev-dependencies]
 gnuplot = "0.0.37"
