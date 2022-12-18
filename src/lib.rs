@@ -493,9 +493,12 @@ mod tests {
         let near_equal = |a: f64, b: f64, epsilon: f64| f64::abs(a - b) < epsilon;
         let (params, s_curve) = s_curve_generator(input, d);
         let mut p0 = s_curve(0.0);
-        let e = constraining_param * 1.1 * params.time_intervals.total_duration() / 1000.;
-        for i in 0..1001 {
-            let p1 = s_curve(i as f64 * params.time_intervals.total_duration() / 1000.);
+        let datapoints = 1000;
+        let margin = 100;
+        let divisor = datapoints as f64;
+        let e = constraining_param * 1.1 * params.time_intervals.total_duration() / divisor;
+        for i in 0 - margin..(datapoints + 1) + margin {
+            let p1 = s_curve(i as f64 * params.time_intervals.total_duration() / divisor);
             if near_equal(p0, p1, e) {
                 p0 = p1;
             } else {
@@ -898,11 +901,7 @@ mod tests {
             start_conditions,
         };
         let times = input.calc_intervals();
-        println!("times.t_a={}", times.t_a);
-        println!("times.t_d={}", times.t_d);
-        println!("times.t_j1={}", times.t_j1);
-        println!("times.t_j2={}", times.t_j2);
-        println!("times.t_v={}", times.t_v);
+        
         assert_eq!(times.total_duration(), 6.194444444444445);
     }
 
@@ -924,11 +923,6 @@ mod tests {
             start_conditions,
         };
         let times = input.calc_intervals();
-        println!("times.t_a={}", times.t_a);
-        println!("times.t_d={}", times.t_d);
-        println!("times.t_j1={}", times.t_j1);
-        println!("times.t_j2={}", times.t_j2);
-        println!("times.t_v={}", times.t_v);
 
         assert_eq!(times.total_duration(), 6.194444444444445);
     }
