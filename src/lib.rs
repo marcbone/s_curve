@@ -109,9 +109,9 @@ impl SCurveStartConditions {
     // direction
     fn dir(&self) -> f64 {
         if self.q1 < self.q0 {
-            return -1.0;
+            -1.0
         } else {
-            return 1.0;
+            1.0
         }
     }
 }
@@ -293,14 +293,14 @@ impl SCurveInput {
         }
     }
 
-    fn calc_times_case_2_precise(&self, mut recursion_depth: i32) -> SCurveTimeIntervals {
-        recursion_depth += 1;
+    fn calc_times_case_2_precise(&self, mut _recursion_depth: i32) -> SCurveTimeIntervals {
+        _recursion_depth += 1;
         let mut times = self.get_times_case_2();
         let mut new_input = self.clone();
         if times.is_max_acceleration_not_reached() {
             new_input.constraints.max_acceleration *= 0.99;
             if new_input.constraints.max_acceleration > 0.01 {
-                return new_input.calc_times_case_2_precise(recursion_depth);
+                return new_input.calc_times_case_2_precise(_recursion_depth);
             }
             new_input.constraints.max_acceleration = 0.;
         }
