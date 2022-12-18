@@ -104,11 +104,11 @@ impl Default for SCurveStartConditions {
 impl SCurveStartConditions {
     /// displacement
     fn h(&self) -> f64 {
-        self.q1 - self.q0
+        f64::abs(self.q1 - self.q0)
     }
     // direction
     fn dir(&self) -> f64{
-        if self.h() < 0.0 {
+        if self.q1 < self.q0 {
             return -1.0;
         }
         else {
@@ -228,7 +228,7 @@ impl SCurveInput {
                     / new_input.constraints.max_acceleration;
         }
 
-        times.t_v = f64::abs(self.start_conditions.h()) / new_input.constraints.max_velocity
+        times.t_v = self.start_conditions.h() / new_input.constraints.max_velocity
             - times.t_a / 2. * (1. + self.start_conditions.v0 / new_input.constraints.max_velocity)
             - times.t_d / 2. * (1. + self.start_conditions.v1 / new_input.constraints.max_velocity);
         if times.t_v <= 0. {
@@ -635,5 +635,27 @@ mod tests {
         let times = input.calc_intervals();
         
         assert_eq!(times.total_duration(), 5.5);
+    }
+
+    #[test]
+    fn simple_curve_reverse_no_phase_3() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 5.,
+            q1: 0.,
+            v0: 0.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        
+        assert_eq!(times.total_duration(), 3.8984532382775527);
     }
 }
