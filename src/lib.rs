@@ -140,7 +140,7 @@ impl SCurveParameters {
     pub fn new(times: &SCurveTimeIntervals, p: &SCurveInput) -> SCurveParameters {
         let a_lim_a = p.constraints.max_jerk * times.t_j1;
         let a_lim_d = -p.constraints.max_jerk * times.t_j2;
-        let v_lim = p.start_conditions.v0 + (times.t_a - times.t_j1) * a_lim_a;
+        let v_lim = p.start_conditions.dir() * p.start_conditions.v0 + (times.t_a - times.t_j1) * a_lim_a;
         SCurveParameters {
             time_intervals: times.clone(),
             j_max: p.constraints.max_jerk,
@@ -202,6 +202,7 @@ impl SCurveInput {
     fn calc_times_case_1(&self) -> SCurveTimeIntervals {
         let mut times = SCurveTimeIntervals::default();
         let mut new_input = self.clone();
+        let dir = self.start_conditions.dir();
         if self.is_a_max_not_reached() {
             times.t_j1 = f64::sqrt(
                 (new_input.constraints.max_velocity - self.start_conditions.v0)
@@ -211,7 +212,7 @@ impl SCurveInput {
         } else {
             times.t_j1 = new_input.constraints.max_acceleration / new_input.constraints.max_jerk;
             times.t_a = times.t_j1
-                + (new_input.constraints.max_velocity - self.start_conditions.v0)
+                + (new_input.constraints.max_velocity - dir * self.start_conditions.v0)
                     / new_input.constraints.max_acceleration;
         }
 
@@ -229,8 +230,8 @@ impl SCurveInput {
         }
 
         times.t_v = self.start_conditions.h() / new_input.constraints.max_velocity
-            - times.t_a / 2. * (1. + self.start_conditions.v0 / new_input.constraints.max_velocity)
-            - times.t_d / 2. * (1. + self.start_conditions.v1 / new_input.constraints.max_velocity);
+            - times.t_a / 2. * (1. + dir * self.start_conditions.v0 / new_input.constraints.max_velocity)
+            - times.t_d / 2. * (1. + dir * self.start_conditions.v1 / new_input.constraints.max_velocity);
         if times.t_v <= 0. {
             return self.calc_times_case_2(0);
         }
@@ -349,17 +350,17 @@ fn eval_position(p: &SCurveParameters, t: f64) -> f64 {
     }
     let dir = p.conditions.dir();
     if t <= times.t_j1 {
-        p.conditions.q0 + dir * p.conditions.v0 * t + dir * p.j_max * t.powi(3) / 6.
+        p.conditions.q0 + p.conditions.v0 * t + dir * p.j_max * t.powi(3) / 6.
     } else if t <= times.t_a - times.t_j1 {
         p.conditions.q0
-            + dir * p.conditions.v0 * t
+            + p.conditions.v0 * t
             + dir * p.a_lim_a / 6. * (3. * t.powi(2) - 3. * times.t_j1 * t + times.t_j1.powi(2))
     } else if t <= times.t_a {
-        p.conditions.q0 + dir * (p.v_lim + p.conditions.v0) * times.t_a / 2.
+        p.conditions.q0 + dir * (p.v_lim + dir * p.conditions.v0) * times.t_a / 2.
             - dir * p.v_lim * (times.t_a - t)
             - dir * p.j_min * (times.t_a - t).powi(3) / 6.
     } else if t <= times.t_a + times.t_v {
-        p.conditions.q0 + dir * (p.v_lim + p.conditions.v0) * times.t_a / 2. + dir * p.v_lim * (t - times.t_a)
+        p.conditions.q0 + dir * (p.v_lim + dir * p.conditions.v0) * times.t_a / 2. + dir * p.v_lim * (t - times.t_a)
     } else if t <= times.total_duration() - times.t_d + times.t_j2 {
         p.conditions.q1 - dir * (p.v_lim + p.conditions.v1) * times.t_d / 2.
             + dir * p.v_lim * (t - times.total_duration() + times.t_d)
@@ -480,7 +481,7 @@ pub fn s_curve_generator(
 #[cfg(test)]
 mod tests {
     use crate::{
-        s_curve_generator, Derivative, SCurveConstraints, SCurveInput, SCurveStartConditions,
+        s_curve_generator, Derivative, SCurveConstraints, SCurveInput, SCurveStartConditions, SCurveParameters,
     };
 
     #[test]
@@ -657,5 +658,197 @@ mod tests {
         let times = input.calc_intervals();
         
         assert_eq!(times.total_duration(), 3.8984532382775527);
+    }
+
+    
+
+    #[test]
+    fn vlim_move_pos_v0_right_direction() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 0.,
+            q1: 10.,
+            v0: 1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        let params = SCurveParameters::new(&times, &input);
+        
+        assert_eq!(params.v_lim, 3.0);
+    }
+
+    #[test]
+    fn vlim_move_pos_v0_wrong_direction() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 0.,
+            q1: 10.,
+            v0: -1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        let params = SCurveParameters::new(&times, &input);
+        
+        assert_eq!(params.v_lim, 3.0);
+    }
+
+
+    #[test]
+    fn vlim_move_neg_v0_right_direction() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 10.,
+            q1: 0.,
+            v0: -1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        let params = SCurveParameters::new(&times, &input);
+        
+        assert_eq!(params.v_lim, 3.0);
+    }
+
+    #[test]
+    fn vlim_move_neg_v0_wrong_direction() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 10.,
+            q1: 0.,
+            v0: 1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        let params = SCurveParameters::new(&times, &input);
+        
+        assert_eq!(params.v_lim, 3.0);
+    }
+
+    #[test]
+    fn t_v_pos_move_v0_wrong_direction() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 0.,
+            q1: 10.,
+            v0: -1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        
+        assert_eq!(times.t_v, 1.3611111111111114);
+    }
+
+    #[test]
+    fn t_v_neg_move_v0_wrong_direction() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 10.,
+            q1: 0.,
+            v0: 1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        
+        assert_eq!(times.t_v, 1.3611111111111114);
+    }
+
+    #[test]
+    fn pos_move_v0_wrong_direction() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 0.,
+            q1: 10.,
+            v0: -1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        println!("times.t_a={}", times.t_a);
+        println!("times.t_d={}", times.t_d);
+        println!("times.t_j1={}", times.t_j1);
+        println!("times.t_j2={}", times.t_j2);
+        println!("times.t_v={}", times.t_v);
+        assert_eq!(times.total_duration(), 6.194444444444445);
+    }
+
+    #[test]
+    fn neg_move_v0_wrong_direction() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 10.,
+            q1: 0.,
+            v0: 1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let times = input.calc_intervals();
+        println!("times.t_a={}", times.t_a);
+        println!("times.t_d={}", times.t_d);
+        println!("times.t_j1={}", times.t_j1);
+        println!("times.t_j2={}", times.t_j2);
+        println!("times.t_v={}", times.t_v);
+        
+        assert_eq!(times.total_duration(), 6.194444444444445);
     }
 }
