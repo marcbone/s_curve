@@ -601,4 +601,33 @@ mod tests {
             );
         }
     }
+
+    #[test]
+    fn simple_curve_reverse() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 10.,
+            q1: 0.,
+            v0: 0.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let s_curve_tmp = s_curve_generator(&input, Derivative::Position);
+        let s_curve = s_curve_tmp.1;
+        let params = s_curve_tmp.0;
+        assert_eq!(params.time_intervals.total_duration(), 5.5);
+        for i in 0..101 {
+            println!(
+                "{}",
+                s_curve(i as f64 * params.time_intervals.total_duration() / 100.)
+            );
+        }
+    }
 }
