@@ -26,6 +26,9 @@ jobs:
           args: --all-features --no-fail-fast --verbose
         env:
           RUSTFLAGS: '-Cinstrument-coverage'
+          LLVM_PROFILE_FILE: 'your_name-%p-%m.profraw'
+      - name: check target
+        run: ls .
       - name: check target
         run: ls ./target/debug/
       - name: check target
