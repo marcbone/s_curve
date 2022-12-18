@@ -1,0 +1,8 @@
+# grcov . -s . --binary-path ./target/debug/ -t html --branch --ignore-not-existing -o ./target/debug/coverage/
+source-dir: .
+binary-path: ./target/debug/
+output-type: lcov
+branch: true
+ignore-not-existing: true
+llvm: true
+output-path: ./lcov.info

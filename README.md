@@ -3,7 +3,7 @@
 [![crates.io](https://img.shields.io/crates/l/s_curve.svg)](https://crates.io/crates/s_curve)
 [![crates.io](https://img.shields.io/crates/d/s_curve.svg)](https://crates.io/crates/s_curve)
 [![docs.rs](https://docs.rs/s_curve/badge.svg)](https://docs.rs/s_curve)
-
+[![codecov](https://codecov.io/github/r2k-in-the-vortex/s_curve/branch/main/graph/badge.svg?token=GF80SKI0TX)](https://codecov.io/github/r2k-in-the-vortex/s_curve)
 
 
 
