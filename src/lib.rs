@@ -106,7 +106,7 @@ impl SCurveStartConditions {
     fn h(&self) -> f64 {
         f64::abs(self.q1 - self.q0)
     }
-    // direction
+    /// direction
     fn dir(&self) -> f64 {
         if self.q1 < self.q0 {
             -1.0
