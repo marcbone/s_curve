@@ -3,8 +3,7 @@
 [![crates.io](https://img.shields.io/crates/l/s_curve.svg)](https://crates.io/crates/s_curve)
 [![crates.io](https://img.shields.io/crates/d/s_curve.svg)](https://crates.io/crates/s_curve)
 [![docs.rs](https://docs.rs/s_curve/badge.svg)](https://docs.rs/s_curve)
-
-
+[![codecov](https://codecov.io/gh/marcbone/s_curve/branch/main/graph/badge.svg?token=9LB5SI9B1E)](https://codecov.io/gh/marcbone/s_curve)
 
 
 
