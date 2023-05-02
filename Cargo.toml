@@ -1,6 +1,6 @@
 [package]
 name = "s_curve"
-version = "0.1.6"
+version = "0.1.7"
 authors = ["Marco Boneberger <m.boneberger@tu-bs.de>"]
 edition = "2018"
 license = "MIT OR Apache-2.0"
