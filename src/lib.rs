@@ -137,10 +137,10 @@ pub struct SCurveParameters {
 
 impl SCurveParameters {
     pub fn new(times: &SCurveTimeIntervals, p: &SCurveInput) -> SCurveParameters {
+        let dir = p.start_conditions.dir();
         let a_lim_a = p.constraints.max_jerk * times.t_j1;
         let a_lim_d = -p.constraints.max_jerk * times.t_j2;
-        let v_lim =
-            p.start_conditions.dir() * p.start_conditions.v0 + (times.t_a - times.t_j1) * a_lim_a;
+        let v_lim = dir * (p.start_conditions.v0 + dir * (times.t_a - times.t_j1) * a_lim_a);
         SCurveParameters {
             time_intervals: times.clone(),
             j_max: p.constraints.max_jerk,
@@ -191,11 +191,13 @@ impl SCurveInput {
         false
     }
     fn is_a_max_not_reached(&self) -> bool {
-        (self.constraints.max_velocity - self.start_conditions.v0) * self.constraints.max_jerk
+        let dir = self.start_conditions.dir();
+        (self.constraints.max_velocity - dir * self.start_conditions.v0) * self.constraints.max_jerk
             < self.constraints.max_acceleration.powi(2)
     }
     fn is_a_min_not_reached(&self) -> bool {
-        (self.constraints.max_velocity - self.start_conditions.v1) * self.constraints.max_jerk
+        let dir = self.start_conditions.dir();
+        (self.constraints.max_velocity - dir * self.start_conditions.v1) * self.constraints.max_jerk
             < self.constraints.max_acceleration.powi(2)
     }
 
@@ -205,7 +207,7 @@ impl SCurveInput {
         let dir = self.start_conditions.dir();
         if self.is_a_max_not_reached() {
             times.t_j1 = f64::sqrt(
-                (new_input.constraints.max_velocity - self.start_conditions.v0)
+                (new_input.constraints.max_velocity - dir * self.start_conditions.v0)
                     / new_input.constraints.max_jerk,
             );
             times.t_a = 2. * times.t_j1;
@@ -218,7 +220,7 @@ impl SCurveInput {
 
         if self.is_a_min_not_reached() {
             times.t_j2 = f64::sqrt(
-                (new_input.constraints.max_velocity - self.start_conditions.v1)
+                (new_input.constraints.max_velocity - dir * self.start_conditions.v1)
                     / new_input.constraints.max_jerk,
             );
             times.t_d = 2. * times.t_j2;
@@ -267,6 +269,7 @@ impl SCurveInput {
     }
 
     fn get_times_case_2(&self) -> SCurveTimeIntervals {
+        let dir = self.start_conditions.dir();
         let t_j1 = self.constraints.max_acceleration / self.constraints.max_jerk;
         let t_j2 = self.constraints.max_acceleration / self.constraints.max_jerk;
         let delta = self.constraints.max_acceleration.powi(4) / self.constraints.max_jerk.powi(2)
@@ -274,13 +277,13 @@ impl SCurveInput {
             + self.constraints.max_acceleration
                 * (4. * self.start_conditions.h()
                     - 2. * self.constraints.max_acceleration / self.constraints.max_jerk
-                        * (self.start_conditions.v0 + self.start_conditions.v1));
+                        * (dir * self.start_conditions.v0 + dir * self.start_conditions.v1));
         let t_a = (self.constraints.max_acceleration.powi(2) / self.constraints.max_jerk
-            - 2. * self.start_conditions.v0
+            - 2. * dir * self.start_conditions.v0
             + f64::sqrt(delta))
             / (2. * self.constraints.max_acceleration);
         let t_d = (self.constraints.max_acceleration.powi(2) / self.constraints.max_jerk
-            - 2. * self.start_conditions.v1
+            - 2. * dir * self.start_conditions.v1
             + f64::sqrt(delta))
             / (2. * self.constraints.max_acceleration);
         let t_v = 0.;
@@ -1135,5 +1138,83 @@ mod tests {
         };
 
         assert!(test_continuous_pva(&input));
+    }
+
+    #[test]
+    fn test_calc_intervals_should_get_same_result_for_opposite_directions() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let constraints_2 = constraints.clone();
+        let start_conditions = SCurveStartConditions {
+            q0: 0.,
+            q1: 10.,
+            v0: -1.,
+            v1: 2.,
+        };       
+        let start_conditions_2 = SCurveStartConditions {
+            q0: 0.,
+            q1: -10.,
+            v0: 1.,
+            v1: -2.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let input_2 = SCurveInput {
+            constraints: constraints_2,
+            start_conditions: start_conditions_2,
+        };
+        let times = input.calc_intervals();
+        let times_2 = input_2.calc_intervals();
+
+        assert!(times.t_j1 == times_2.t_j1);
+        assert!(times.t_a == times_2.t_a);
+        assert!(times.t_v == times_2.t_v);
+        assert!(times.t_j2 == times_2.t_j2);
+        assert!(times.t_d == times_2.t_d);
+
+    }
+
+    #[test]
+    fn test_calc_intervals_should_get_same_result_for_opposite_directions_vmax_not_reached() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let constraints_2 = constraints.clone();
+        let start_conditions = SCurveStartConditions {
+            q0: 0.,
+            q1: 5.,
+            v0: -1.,
+            v1: 2.,
+        };  
+        let start_conditions_2 = SCurveStartConditions {
+            q0: 0.,
+            q1: -5.,
+            v0: 1.,
+            v1: -2.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+        let input_2 = SCurveInput {
+            constraints: constraints_2,
+            start_conditions: start_conditions_2,
+        };
+        let times = input.calc_intervals();
+        let times_2 = input_2.calc_intervals();
+
+        assert!(times.t_j1 == times_2.t_j1);
+        assert!(times.t_a == times_2.t_a);
+        assert!(times.t_v == times_2.t_v);
+        assert!(times.t_j2 == times_2.t_j2);
+        assert!(times.t_d == times_2.t_d);
+
     }
 }
