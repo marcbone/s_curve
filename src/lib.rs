@@ -1153,7 +1153,7 @@ mod tests {
             q1: 10.,
             v0: -1.,
             v1: 2.,
-        };       
+        };
         let start_conditions_2 = SCurveStartConditions {
             q0: 0.,
             q1: -10.,
@@ -1176,7 +1176,6 @@ mod tests {
         assert!(times.t_v == times_2.t_v);
         assert!(times.t_j2 == times_2.t_j2);
         assert!(times.t_d == times_2.t_d);
-
     }
 
     #[test]
@@ -1192,7 +1191,7 @@ mod tests {
             q1: 5.,
             v0: -1.,
             v1: 2.,
-        };  
+        };
         let start_conditions_2 = SCurveStartConditions {
             q0: 0.,
             q1: -5.,
@@ -1215,6 +1214,5 @@ mod tests {
         assert!(times.t_v == times_2.t_v);
         assert!(times.t_j2 == times_2.t_j2);
         assert!(times.t_d == times_2.t_d);
-
     }
 }
