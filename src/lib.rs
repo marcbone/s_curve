@@ -1141,7 +1141,7 @@ mod tests {
     }
 
     #[test]
-    fn test_calc_intervals_should_get_same_result_for_opposite_directions() {
+    fn calc_intervals_should_get_same_result_for_opposite_directions() {
         let constraints = SCurveConstraints {
             max_jerk: 3.,
             max_acceleration: 2.0,
@@ -1179,7 +1179,7 @@ mod tests {
     }
 
     #[test]
-    fn test_calc_intervals_should_get_same_result_for_opposite_directions_vmax_not_reached() {
+    fn calc_intervals_should_get_same_result_for_opposite_directions_vmax_not_reached() {
         let constraints = SCurveConstraints {
             max_jerk: 3.,
             max_acceleration: 2.0,
@@ -1214,5 +1214,47 @@ mod tests {
         assert!(times.t_v == times_2.t_v);
         assert!(times.t_j2 == times_2.t_j2);
         assert!(times.t_d == times_2.t_d);
+    }
+
+    #[test]
+    fn is_trajectory_feasible_basic() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 0.,
+            q1: 10.,
+            v0: 1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+
+        assert!(input.is_trajectory_feasible());
+    }
+
+    #[test]
+    fn is_trajectory_feasible_v_max_not_reached() {
+        let constraints = SCurveConstraints {
+            max_jerk: 3.,
+            max_acceleration: 2.0,
+            max_velocity: 3.,
+        };
+        let start_conditions = SCurveStartConditions {
+            q0: 0.,
+            q1: 4.,
+            v0: 1.,
+            v1: 0.,
+        };
+        let input = SCurveInput {
+            constraints,
+            start_conditions,
+        };
+
+        assert!(input.is_trajectory_feasible());
     }
 }
